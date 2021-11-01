@@ -1,0 +1,15 @@
+[package]
+name = "Theia"
+version = "0.1.0"
+authors = ["Guy <guy.garcia@protonmail.com>"]
+edition = "2018"
+
+[workspace]
+
+[dependencies]
+camera = { path = "src/camera" }
+interface = { path = "src/interface" }
+processor = { path = "src/processor" }
+
+serde = { version = "1.0.103", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0.67"}
