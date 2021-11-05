@@ -2,10 +2,64 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Hello!</title>
+    <title>RUMARINO API</title>
   </head>
+
+  <style>
+    table, th, td {
+      border:1px solid black;
+    }
+
+    .button {
+      border: none;
+      color: white;
+      padding: 16px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      transition-duration: 0.4s;
+      cursor: pointer;
+    }
+    .button1 {
+      background-color: white;
+      color: black;
+      border: 2px solid #008CBA;
+    }
+
+    .button1:hover {
+      background-color: #008CBA;
+      color: white;
+    }
+  </style>
+  
   <body>
-    <h1>Hello!</h1>
-    <p>Hi from Rust</p>
+    <h1>Rumarino API</h1>
+
+    <table style="width:100%">
+      <tr>
+        <th>Routes</th>
+        <th>Action</th>
+      </tr>
+      <tr>
+        <td>/</td>
+        <td>sends you here</td>
+      </tr>
+      <tr>
+        <td>/detected_object</td>
+        <td>(TODO) sends back a JSON of detected object</td>
+      </tr>
+      <tr>
+        <td>/stop</td>
+        <td>stops execution of server</td>
+      </tr>
+    </table>
+
+    <h3>UI: Actions made simple.</h3>
+    <button class="button button1"
+    onclick="window.location.href=window.location.href+'stop'"
+    >Stop Server</button>
+
   </body>
 </html>

@@ -14,7 +14,7 @@ fn main() {
 
     let mut ip = "127.0.0.1".to_string();
     let mut port = "5555".to_string();
-    let mut threads = 5;
+    let mut threads = 4;
 
     for idx in 0..args.len() {
         if args[idx] == "i".to_string() ||  args[idx] == "ip".to_string() {
@@ -25,7 +25,7 @@ fn main() {
         }
         else if args[idx] == "t".to_string() || args[idx] == "threads".to_string() {
             let arg: i32 = FromStr::from_str(args[idx+1].as_str()).unwrap();
-            if arg > 0 || arg <= 15 {
+            if arg > 0 || arg <= 16 {
                 threads = arg;
             }            
         }
