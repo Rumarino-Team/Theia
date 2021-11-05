@@ -3,13 +3,13 @@ use std::io::prelude::*;
 use std::net::TcpListener;
 use std::net::TcpStream;
 use std::env;
+use std::time::Duration;
 use std::thread;
 use threadpool::ThreadPool;
 use std::str::FromStr;
-use std::sync::Arc;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, Ordering};
 
-use std::time::Duration;
+static RUNNING: AtomicBool = AtomicBool::new(true);
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -39,28 +39,25 @@ fn main() {
     let listener = TcpListener::bind(addr).unwrap();
 
     let t_pool = ThreadPool::new(threads as usize);
-    let shutdown = Arc::new(AtomicUsize::new(0));
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        let shutdown = shutdown.clone();
-        if shutdown.load(Ordering::Relaxed) > 0 {
+
+        if RUNNING.load(Ordering::Relaxed) == false {
             break;
         }
         else {
             t_pool.execute(|| {
-                handle_connection(stream, shutdown);
+                handle_connection(stream);
             });
         }
         
     }
 
-    println!("Shutting down server...");
-    t_pool.join();
-    std::process::exit(0);
+    shutdown(t_pool);
 }
 
-fn handle_connection(mut stream: TcpStream, shutdown: Arc<AtomicUsize>) {
+fn handle_connection(mut stream: TcpStream) {
     let mut buffer = [0; 1024];
 
     stream.read(&mut buffer).unwrap();
@@ -95,6 +92,14 @@ fn handle_connection(mut stream: TcpStream, shutdown: Arc<AtomicUsize>) {
     stream.write(response.as_bytes()).unwrap();
     stream.flush().unwrap();
     if buffer.starts_with(stop) {
-        shutdown.fetch_add(1, Ordering::Relaxed);
+        RUNNING.store(false, Ordering::Relaxed);
+        
     }
+}
+
+fn shutdown(t_pool: threadpool::ThreadPool) {
+    println!("Shutting down server...");
+    t_pool.join();
+    thread::sleep(Duration::from_secs(3));
+    std::process::exit(0);
 }
