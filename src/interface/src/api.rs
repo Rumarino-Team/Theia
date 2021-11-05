@@ -6,6 +6,8 @@ use std::env;
 use std::thread;
 use threadpool::ThreadPool;
 use std::str::FromStr;
+use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use std::time::Duration;
 
@@ -37,17 +39,28 @@ fn main() {
     let listener = TcpListener::bind(addr).unwrap();
 
     let t_pool = ThreadPool::new(threads as usize);
+    let shutdown = Arc::new(AtomicUsize::new(0));
 
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-
-        t_pool.execute(|| {
-            handle_connection(stream);
-        });
+        let shutdown = shutdown.clone();
+        if shutdown.load(Ordering::Relaxed) > 0 {
+            break;
+        }
+        else {
+            t_pool.execute(|| {
+                handle_connection(stream, shutdown);
+            });
+        }
+        
     }
+
+    println!("Shutting down server...");
+    t_pool.join();
+    std::process::exit(0);
 }
 
-fn handle_connection(mut stream: TcpStream) {
+fn handle_connection(mut stream: TcpStream, shutdown: Arc<AtomicUsize>) {
     let mut buffer = [0; 1024];
 
     stream.read(&mut buffer).unwrap();
@@ -82,7 +95,6 @@ fn handle_connection(mut stream: TcpStream) {
     stream.write(response.as_bytes()).unwrap();
     stream.flush().unwrap();
     if buffer.starts_with(stop) {
-        println!("Shutting down server...");
-        std::process::exit(0);
+        shutdown.fetch_add(1, Ordering::Relaxed);
     }
 }
