@@ -3,3 +3,10 @@ name = "interface"
 version = "0.1.0"
 authors = ["Guy <guy.garcia@protonmail.com>"]
 edition = "2018"
+
+[dependencies]
+threadpool = "1.0"
+
+[[bin]]
+name = "api"
+path = "src/api.rs"
